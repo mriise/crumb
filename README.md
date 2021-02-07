@@ -1,6 +1,6 @@
 [![License](https://img.shields.io/crates/l/crumb)](https://opensource.org/licenses/MIT)
 [![Crates.io](https://img.shields.io/crates/v/crumb)](https://crates.io/crates/crumb)
-[![Documentation](https://docs.rs/multibase/badge.svg?style=flat-square)](https://docs.rs/multibase)
+[![Documentation](https://docs.rs/crumb/badge.svg?style=flat-square)](https://docs.rs/crumb)
 
 Encode an index of a [nibble](https://en.wikipedia.org/wiki/Nibble) from a u64 as a u8.
 
