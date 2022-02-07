@@ -1,6 +1,6 @@
 [package]
 name = "crumb"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["mriise <mark.riise26@gmail.com>"]
 license = "MIT"
 description = "Encode a nibble from a u64 as a u8."
