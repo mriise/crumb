@@ -7,10 +7,11 @@
 //! # Usage
 //! 
 //! ```rust
-//! use crate::Crumb;
+//! use crumb::Crumb;
 //! 
 //! fn main() {
 //!     let crumb = Crumb::new(1, 0b11111111).unwrap();
+//!     // bits outside of the index are discarded
 //!     assert_eq!(0b11110000u64, crumb.get_u64());
 //! }
 //! ```
@@ -39,7 +40,7 @@ pub struct Crumb (u8);
 
 impl Crumb {
     /// constructs a crumb from an index and a source u64
-    fn new(nibble_index: u8, src: u64) -> Option<Self> {
+    pub fn new(nibble_index: u8, src: u64) -> Option<Self> {
         if nibble_index >= MAX_NIBBLE_INDEX { return None }
         
         //read nibble from u64
@@ -52,8 +53,8 @@ impl Crumb {
         Some(Self(byte))
     }
 
-
-    fn get_u64(&self) -> u64 {
+    /// unpacks the crumb into a u64
+    pub fn get_u64(&self) -> u64 {
         let crumb = self.0;
         let mut nibble = crumb << 4;
         let nibble_index = crumb >> 4;
@@ -66,7 +67,7 @@ impl Crumb {
     }
 
     /// returns inner u8, though I would recommend against using this right away to keep the the niceities of the type system
-    fn get_u8(&self) -> u8 {
+    pub fn get_u8(&self) -> u8 {
         self.0
     }
 }
@@ -83,13 +84,13 @@ mod tests {
 
     #[test]
     fn exaustive() {
-        for x in 0..crate::MAX_NIBBLE_INDEX {
-            for i in  1..16 {
-                let shifted = i << x*4;
-                // println!("\ntesting nibble_index {} for {}", x, shifted);
-                let crumb = Crumb::new(x, shifted).unwrap();
+        for index in 0..crate::MAX_NIBBLE_INDEX {
+            for nibble in  1..16 {
+                let shifted = nibble << index*4;
 
-                assert_eq!(shifted >> x*4, crumb.get_u64() >> x*4);
+                let crumb = Crumb::new(index, shifted).unwrap();
+
+                assert_eq!(shifted >> index*4, crumb.get_u64() >> index*4);
             }
         }
     }
