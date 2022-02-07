@@ -11,13 +11,11 @@ Encode an index of a [nibble](https://en.wikipedia.org/wiki/Nibble) from a u64 a
 # Usage
 
 ```rust
-use crate::CrumbExt;
+use crumb::Crumb;
 
 fn main() {
-	let test: u64 = 0b11111111;
-	// let crumb: u8 = unsafe { test.get_unchecked_crumb(1) };
-	let crumb: u8 = test.get_crumb(1).unwrap();
-	assert_eq!(0b11110000u64, u64::from_crumb(crumb));
+	let crumb = Crumb::new(1, 0b11111111).unwrap();
+	assert_eq!(0b11110000u64, crumb.get_u64()); // external bits are discarded
 }
 ```
 
@@ -25,10 +23,12 @@ fn main() {
 
 A nibble of something is about the size of a crumb or something like that...
 
-### How?
+### Why?
 
 Was doing some research on variable length integers and realized how nicely this fits.
 
-### Why?
+### For What?
 
-I don't think there are too many applications for this, I have one in mind but that is an entire project in itself.
+Not sure!
+
+I don't think there are too many applications for this.
