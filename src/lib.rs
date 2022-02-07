@@ -7,13 +7,11 @@
 //! # Usage
 //! 
 //! ```rust
-//! use crate::CrumbExt;
+//! use crate::Crumb;
 //! 
 //! fn main() {
-//!     let test: u64 = 0b11111111;
-//!     // let crumb: u8 = unsafe { test.get_unchecked_crumb(1) };
-//!     let crumb: u8 = test.get_crumb(1).unwrap();
-//!     assert_eq!(0b11110000u64, u64::from_crumb(crumb));
+//!     let crumb = Crumb::new(1, 0b11111111).unwrap();
+//!     assert_eq!(0b11110000u64, crumb.get_u64());
 //! }
 //! ```
 //! 
@@ -21,68 +19,77 @@
 //! 
 //! A nibble of something is about the size of a crumb or something like that...
 //! 
-//! ### How?
+//! ### Why?
 //! 
 //! Was doing some research on variable length integers and realized how nicely this fits.
 //! 
-//! ### Why?
+//! ### For What?
 //! 
-//! I don't think there are too many applications for this, I have one in mind but that is an entire project in itself.
+//! Not sure!
+//! 
+//! I don't think there are too many applications for this.
 
-const MAX_NIBBLE_INDEX: u8 = 1u8 << 4;
-/// this is NOT intended to be implemented in anything but u64, it is only pub for documentation
-pub trait CrumbExt {
-    unsafe fn get_unchecked_crumb(&self, nibble_index: u8) -> u8;
-    /// None where `nibble_index >= 1u8 << 4`
-    fn get_crumb(&self, nibble_index: u8) -> core::option::Option<u8>;
-    fn from_crumb(crumb: u8) -> Self;
-}
+#![no_std]
 
-impl CrumbExt for u64 {
-    unsafe fn get_unchecked_crumb(&self, nibble_index: u8) -> u8 {
+pub const MAX_NIBBLE_INDEX: u8 = 1u8 << 4;
+
+/// 
+#[derive(Default)]
+pub struct Crumb (u8);
+
+impl Crumb {
+    /// constructs a crumb from an index and a source u64
+    fn new(nibble_index: u8, src: u64) -> Option<Self> {
+        if nibble_index >= MAX_NIBBLE_INDEX { return None }
+        
         //read nibble from u64
-        let src = self.to_le_bytes();
+        let src = src.to_le_bytes();
         let mut byte = src[(nibble_index/2) as usize];
+
         //pack into u8
         byte >>= (nibble_index & 1) * 4;
         byte |= nibble_index << 4;
-        byte
+        Some(Self(byte))
     }
-    fn get_crumb(&self, nibble_index: u8) -> core::option::Option<u8> {
-        if nibble_index >= MAX_NIBBLE_INDEX {return None}
-        unsafe { Some(self.get_unchecked_crumb(nibble_index)) }
-    }
-    fn from_crumb(crumb: u8) -> Self {
+
+
+    fn get_u64(&self) -> u64 {
+        let crumb = self.0;
         let mut nibble = crumb << 4;
         let nibble_index = crumb >> 4;
+
         // shift to right side of byte if index is even
         nibble >>= ((nibble_index & 1) ^ 1) * 4;
         let mut bytes = [0u8; 8];
         bytes[(nibble_index/2) as usize] = nibble;
-        Self::from_le_bytes(bytes)
+        u64::from_le_bytes(bytes)
+    }
+
+    /// returns inner u8, though I would recommend against using this right away to keep the the niceities of the type system
+    fn get_u8(&self) -> u8 {
+        self.0
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::CrumbExt;
+
+    use crate::Crumb;
     #[test]
     fn it_works() {
-        let test: u64 = 0b11111111;
-        let crumb: u8 = test.get_crumb(1).unwrap();
-        assert_eq!(0b11110000u64, u64::from_crumb(crumb));
+        let crumb = Crumb::new(1, 0b11111111).unwrap();
+        assert_eq!(0b11110000u64, crumb.get_u64());
     }
 
     #[test]
     fn exaustive() {
-        for x in 0..(1u8 << 4) {
+        for x in 0..crate::MAX_NIBBLE_INDEX {
             for i in  1..16 {
                 let shifted = i << x*4;
-                println!("\ntesting nibble_index {} for {}", x, shifted);
-                let crumb = shifted.get_crumb(x).unwrap();
+                // println!("\ntesting nibble_index {} for {}", x, shifted);
+                let crumb = Crumb::new(x, shifted).unwrap();
 
-                assert_eq!(shifted >> x*4, u64::from_crumb(crumb) >> x*4);
+                assert_eq!(shifted >> x*4, crumb.get_u64() >> x*4);
             }
         }
     }
