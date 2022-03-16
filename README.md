@@ -2,7 +2,7 @@
 [![Crates.io](https://img.shields.io/crates/v/crumb)](https://crates.io/crates/crumb)
 [![Documentation](https://docs.rs/crumb/badge.svg?style=flat-square)](https://docs.rs/crumb)
 
-Encode an index of a [nibble](https://en.wikipedia.org/wiki/Nibble) from a u64 as a u8.
+Encode an index and value of a 4 bit [nibble](https://en.wikipedia.org/wiki/Nibble) from a u64 as a u8.
 
 `|      4 bits     |     4 bits     |`
 
